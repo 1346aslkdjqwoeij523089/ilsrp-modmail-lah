@@ -197,7 +197,19 @@ class TicketSelect(View):
         self.add_item(select)
 
     async def select_callback(self, interaction: Interaction):
-        await create_ticket(interaction, interaction.data["values"][0])
+        # Get the selected value from the interaction data
+        try:
+            values = interaction.data.get("values", [])
+            if not values:
+                await interaction.response.send_message("Error: No category selected!", ephemeral=True)
+                return
+            ticket_type = values[0]
+        except AttributeError:
+            # Fallback: try to get from custom_id or other means
+            await interaction.response.send_message("Error: Could not get selection!", ephemeral=True)
+            return
+        
+        await create_ticket(interaction, ticket_type)
 
 
 async def create_ticket(interaction: Interaction, ticket_type: str):
